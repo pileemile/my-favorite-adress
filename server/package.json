@@ -4,7 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "start": "ts-node src/index.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "argon2": "^0.44.0",
@@ -12,9 +14,10 @@
     "better-sqlite3": "^12.6.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "typeorm": "^0.3.28"
+    "typeorm": "^0.0.1"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.28.5",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "nodemon": "^3.1.11",
