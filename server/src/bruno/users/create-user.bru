@@ -1,0 +1,35 @@
+meta {
+  name: Create user
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/api/users
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const suffix = Date.now();
+  bru.setEnvVar("email", `test+${suffix}@test.com`);
+  bru.setEnvVar("password", `supersecret-${suffix}`);
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{email}}",
+    "password": "{{password}}"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body?.item?.email) {
+    bru.setEnvVar("createdEmail", body.item.email);
+  }
+}
