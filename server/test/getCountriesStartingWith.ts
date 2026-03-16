@@ -27,7 +27,7 @@ export async function getCountriesStartingWith(srch: string): Promise<string[]> 
             country.toLowerCase().startsWith(normalizedSearch),
         );
     } catch (err) {
-        console.error("🆘 got an error:", err);
+        console.error(" got an error:", err);
         return [];
     }
 }

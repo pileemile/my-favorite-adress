@@ -1,0 +1,37 @@
+meta {
+  name: Toggle favorite address (future feature)
+  type: http
+  seq: 1
+}
+
+patch {
+  url: http://localhost:3000/api/addresses/{{addressId}}/favorite
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "favorite": true
+  }
+}
+
+tests {
+  test("should return 200 for a valid favorite toggle", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("response should contain updated address with favorite=true", function() {
+    const body = res.getBody();
+    expect(body.item).to.be.an("object");
+    expect(body.item.favorite).to.equal(true);
+  });
+}

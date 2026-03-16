@@ -249,4 +249,136 @@ describe("User auth flow", () => {
             });
         }
     });
+    it("rejects a user creation when email format is invalid", async () => {
+        const server = startTestServer();
+
+        try {
+            const { port } = server.address() as AddressInfo;
+            const response = await fetch(`http://127.0.0.1:${port}/api/users`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: "not-an-email",
+                    password: "supersecret",
+                }),
+            });
+
+            expect(response.status).toBe(400);
+            const data = (await response.json()) as { message: string };
+            expect(data.message).toContain("valid email");
+        } finally {
+            await new Promise<void>((resolve, reject) => {
+                server.close((error) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    resolve();
+                });
+            });
+        }
+    });
+
+    it("rejects user creation when email is already taken", async () => {
+        const server = startTestServer();
+
+        try {
+            const { port } = server.address() as AddressInfo;
+            const response = await fetch(`http://127.0.0.1:${port}/api/users`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(createdCredentials),
+            });
+
+            expect(response.status).toBe(409);
+            const data = (await response.json()) as { message: string };
+            expect(data.message).toContain("already");
+        } finally {
+            await new Promise<void>((resolve, reject) => {
+                server.close((error) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    resolve();
+                });
+            });
+        }
+    });
+
+    it("checks email availability for a non-existing email", async () => {
+        const server = startTestServer();
+
+        try {
+            const { port } = server.address() as AddressInfo;
+            const response = await fetch(`http://127.0.0.1:${port}/api/users/email-availability?email=available%40test.com`);
+
+            expect(response.status).toBe(200);
+            const data = (await response.json()) as { available: boolean };
+            expect(data.available).toBe(true);
+        } finally {
+            await new Promise<void>((resolve, reject) => {
+                server.close((error) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    resolve();
+                });
+            });
+        }
+    });
+
+    it("checks email availability for an existing email", async () => {
+        const server = startTestServer();
+
+        try {
+            const { port } = server.address() as AddressInfo;
+            const response = await fetch(`http://127.0.0.1:${port}/api/users/email-availability?email=test%40test.com`);
+
+            expect(response.status).toBe(200);
+            const data = (await response.json()) as { available: boolean };
+            expect(data.available).toBe(false);
+        } finally {
+            await new Promise<void>((resolve, reject) => {
+                server.close((error) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    resolve();
+                });
+            });
+        }
+    });
+
+    it("returns 400 when checking email availability with an invalid email", async () => {
+        const server = startTestServer();
+
+        try {
+            const { port } = server.address() as AddressInfo;
+            const response = await fetch(`http://127.0.0.1:${port}/api/users/email-availability?email=wrong-email`);
+
+            expect(response.status).toBe(400);
+        } finally {
+            await new Promise<void>((resolve, reject) => {
+                server.close((error) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    resolve();
+                });
+            });
+        }
+    });
 });

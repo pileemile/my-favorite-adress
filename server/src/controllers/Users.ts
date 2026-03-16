@@ -4,6 +4,7 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { isAuthorized } from "../utils/isAuthorized";
 import { getUserFromRequest } from "../utils/getUserFromRequest";
+import { isValidEmail } from "../utils/isValidEmail";
 
 const tokenSecretKey = process.env.SESSION_SECRET || "superlongstring";
 
@@ -16,6 +17,15 @@ usersRouter.post("/", async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ message: `email and password are required` });
   }
+    if (typeof email !== "string" || !isValidEmail(email)) {
+        return res.status(400).json({ message: `a valid email is required` });
+    }
+
+    const existingUser = await User.findOneBy({ email });
+
+    if (existingUser) {
+        return res.status(409).json({ message: `email already taken` });
+    }
 
   try {
     const user = new User();
@@ -28,7 +38,16 @@ usersRouter.post("/", async (req, res) => {
     return res.status(500).json({ message: `unable to create user` });
   }
 });
+usersRouter.get("/email-availability", async (req, res) => {
+    const email = req.query.email;
 
+    if (typeof email !== "string" || !isValidEmail(email)) {
+        return res.status(400).json({ message: `a valid email is required` });
+    }
+
+    const existingUser = await User.findOneBy({ email });
+    return res.json({ available: !existingUser });
+});
 usersRouter.get("/me", isAuthorized, async (req, res) => {
   const user = await getUserFromRequest(req);
   return res.json({ item: user });
