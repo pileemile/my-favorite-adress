@@ -6,11 +6,9 @@ test('remplit le formulaire d\'inscription et affiche un toast de succès', asyn
 
     await page.goto('/signup');
 
-    await page.getByLabel(/name|nom/i).fill('Playwright User');
-    await page.getByLabel(/email/i).fill(email);
-    await page.getByLabel(/password|mot de passe/i).fill('P@ssword1234!');
-
+    await page.getByPlaceholder(/user email/i).fill(email);
+    await page.getByPlaceholder(/password/i).fill('P@ssword1234!');
     await page.getByRole('button', { name: /sign\s*up|s\'inscrire|inscription/i }).click();
 
-    await expect(page.getByText(/success|succès|compte créé|account created/i)).toBeVisible();
+    await expect(page.getByText(/user created, you can signin/i)).toBeVisible();
 });
