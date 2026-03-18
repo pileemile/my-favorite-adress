@@ -1,0 +1,29 @@
+name: Server Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+            node-version: lts/*
+            cache: yarn
+            cache-dependency-path: server/yarn.lock
+
+      - name: Install dependencies
+        run: yarn --cwd server install --frozen-lockfile
+
+      - name: Typecheck
+        run: yarn --cwd server typecheck
+
+      - name: Run unit and integration tests
+        run: yarn --cwd server test
